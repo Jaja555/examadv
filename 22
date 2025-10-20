@@ -1,0 +1,80 @@
+def is_in_range(row, col, size):
+    return 0 <= row < size and 0 <= col < size
+
+
+direction_mapper = {
+    "up": (-1, 0),
+    "down": (1, 0),
+    "left": (0, -1),
+    "right": (0, 1)
+}
+
+n = int(input())
+
+bee_position = None
+hive_position = None
+matrix = []
+
+for row_index in range(n):
+    data = list(input())
+    if "B" in data:
+        bee_position = [row_index, data.index("B")]
+    if "H" in data:
+        hive_position = (row_index, data.index("H"))
+    matrix.append(data)
+
+energy = 15
+nectar_collected = 0
+energy_restored = False
+
+while True:
+    if energy <= 0:
+        if nectar_collected >= 30 and not energy_restored:
+            energy += (nectar_collected - 30)
+            nectar_collected = 30
+            energy_restored = True
+            if energy <= 0:
+                print("This is the end! Beesy ran out of energy.")
+                matrix[bee_position[0]][bee_position[1]] = "B"
+                break
+        else:
+            print("This is the end! Beesy ran out of energy.")
+            matrix[bee_position[0]][bee_position[1]] = "B"
+            break
+
+    command = input()
+
+    current_row, current_col = bee_position
+
+    row_move, col_move = direction_mapper[command]
+    next_row = current_row + row_move
+    next_col = current_col + col_move
+
+    # Check boundaries - if out of bounds, skip move but still lose energy
+    if not is_in_range(next_row, next_col, n):
+        energy -= 1
+        continue
+
+    # Clear old position
+    matrix[current_row][current_col] = "-"
+
+    # Update bee position
+    bee_position = [next_row, next_col]
+    energy -= 1
+
+    current_cell = matrix[next_row][next_col]
+
+    if current_cell.isdigit():
+        nectar_collected += int(current_cell)
+        matrix[next_row][next_col] = "-"
+
+    elif current_cell == "H":
+        if nectar_collected >= 30:
+            print(f"Great job, Beesy! The hive is full. Energy left: {energy}")
+        else:
+            print("Beesy did not manage to collect enough nectar.")
+        matrix[next_row][next_col] = "B"
+        break
+
+for row in matrix:
+    print(''.join(row))
