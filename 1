@@ -1,0 +1,39 @@
+from collections import deque
+
+packages = [int(el) for el in input().split()]
+couriers_capacities = deque([int(el) for el in input().split()])
+
+total_weight_delivered = 0
+
+while packages and couriers_capacities:
+    current_package = packages[-1]
+    current_courier_capacity = couriers_capacities[0]
+
+    if current_courier_capacity >= current_package:
+        # Delivery successful
+        total_weight_delivered += current_package
+        packages.pop()  # Remove the package
+
+        # Update courier capacity
+        new_capacity = current_courier_capacity - (2 * current_package)
+        couriers_capacities.popleft()  # Remove the courier temporarily
+
+        if new_capacity > 0:
+            couriers_capacities.append(new_capacity)
+        # If new_capacity <= 0, courier is removed permanently
+
+    else:
+        # Courier cannot fully deliver the package
+        total_weight_delivered += current_courier_capacity
+        packages[-1] -= current_courier_capacity  # Update package weight
+        couriers_capacities.popleft()  # Remove courier
+
+# Output
+print(f"Total weight: {total_weight_delivered} kg")
+
+if not packages and not couriers_capacities:
+    print("Congratulations, all packages were delivered successfully by the couriers today.")
+elif packages and not couriers_capacities:
+    print(f"Unfortunately, there are no more available couriers to deliver the following packages: {', '.join(map(str, packages))}")
+elif not packages and couriers_capacities:
+    print(f"Couriers are still on duty: {', '.join(map(str, couriers_capacities))} but there are no more packages to deliver.")
